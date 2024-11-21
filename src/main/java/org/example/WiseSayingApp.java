@@ -36,16 +36,25 @@ public class WiseSayingApp {
                     System.out.println(list.get(i));
                 }
             }else if(cmd.startsWith("삭제?id=")){
+                boolean isDeleted = false; // 삭제 여부를 추적하는 변수
                 String temp = cmd.substring(cmd.indexOf('=')+1);
-                int num = Integer.parseInt(temp);
 
-                for(WiseSaying wiseSaying: list){
-                    if(wiseSaying.getId() == num){
-                        list.remove(wiseSaying);
-                        System.out.println(num + "번 명언이 삭제되었습니다.");
-                        break;
+                try {
+                    int num = Integer.parseInt(temp);
+
+                    for(int i = 0; i < list.size(); i++){
+                        if(list.get(i).getId() == num){
+                            list.remove(i);
+                            System.out.println(num + "번 명언이 삭제되었습니다.");
+                            isDeleted = true;
+                            break;
+                        }
                     }
-
+                    if (!isDeleted) {
+                        System.out.println("해당 번호는 존재하지 않습니다."); // 삭제되지 않은 경우 메시지 표시
+                    }
+                }catch (Exception e){
+                    System.out.println("올바른 값을 입력하세요.");
                 }
             }
         }

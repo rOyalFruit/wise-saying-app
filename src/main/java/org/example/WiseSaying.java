@@ -1,5 +1,7 @@
 package org.example;
 
+import java.util.Objects;
+
 public class WiseSaying {
     private int id;
     private String content;
