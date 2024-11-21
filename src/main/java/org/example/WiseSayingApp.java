@@ -2,6 +2,7 @@ package org.example;
 
 import java.sql.Array;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 
@@ -33,6 +34,18 @@ public class WiseSayingApp {
                 System.out.println("----------------------");
                 for(int i = list.size()-1; i >= 0; i--){
                     System.out.println(list.get(i));
+                }
+            }else if(cmd.startsWith("삭제?id=")){
+                String temp = cmd.substring(cmd.indexOf('=')+1);
+                int num = Integer.parseInt(temp);
+
+                for(WiseSaying wiseSaying: list){
+                    if(wiseSaying.getId() == num){
+                        list.remove(wiseSaying);
+                        System.out.println(num + "번 명언이 삭제되었습니다.");
+                        break;
+                    }
+
                 }
             }
         }
