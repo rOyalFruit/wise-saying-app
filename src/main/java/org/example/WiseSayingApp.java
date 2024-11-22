@@ -11,6 +11,7 @@ public class WiseSayingApp {
     private int lastId = 0;
     private final String DB_FOLDER = "db/wiseSaying";
     private final String LAST_ID_FILE = DB_FOLDER + "/lastId.txt";
+    private final String DATA_JSON_FILE = DB_FOLDER + "/data.json";
 
     public void run() {
         ensureDbFolderExists();
@@ -34,6 +35,8 @@ public class WiseSayingApp {
                 deleteWiseSaying(cmd);
             } else if (cmd.startsWith("수정?id=")) {
                 updateWiseSaying(cmd);
+            } else if (cmd.equals("빌드")) {
+                buildDataJson();
             } else {
                 System.out.println("알 수 없는 명령입니다.");
             }
@@ -42,7 +45,9 @@ public class WiseSayingApp {
         sc.close();
     }
 
-    /** 지정한 경로에 폴더가 존재하지 않을 경우, 해당 경로에 폴더를 생성하는 메서드 */
+    /**
+     * 지정한 경로에 폴더가 존재하지 않을 경우, 해당 경로에 폴더를 생성하는 메서드
+     */
     private void ensureDbFolderExists() {
         try {
             Files.createDirectories(Paths.get(DB_FOLDER));
@@ -51,7 +56,9 @@ public class WiseSayingApp {
         }
     }
 
-    /**  지정한 경로 내에 있는 txt 파일에서 마지막으로 작성된 명언 id를 불러오는 메서드 */
+    /**
+     * 지정한 경로 내에 있는 txt 파일에서 마지막으로 작성된 명언 id를 불러오는 메서드
+     */
     private void loadLastId() {
         try {
             Path path = Paths.get(LAST_ID_FILE);
@@ -63,7 +70,9 @@ public class WiseSayingApp {
         }
     }
 
-    /**  마지막으로 작성된 명언 id를 지정한 경로에 txt 파일로 저장하는 메서드 */
+    /**
+     * 마지막으로 작성된 명언 id를 지정한 경로에 txt 파일로 저장하는 메서드
+     */
     private void saveLastId() {
         try {
             Files.writeString(Paths.get(LAST_ID_FILE), String.valueOf(lastId));
@@ -72,10 +81,18 @@ public class WiseSayingApp {
         }
     }
 
-    /**  지정한 경로 내에 있는 JSON 파일들을 읽고, 각 파일 내용을 WiseSaying 인스턴스로 변환한 뒤 리스트에 저장하는 메서드 */
+    /**
+     * 지정한 경로 내에 있는 JSON 파일들을 읽고, 각 파일 내용을 WiseSaying 인스턴스로 변환한 뒤 리스트에 저장하는 메서드
+     */
     private void loadWiseSayings() {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(DB_FOLDER), "*.json")) {
             for (Path entry : stream) {
+
+                // data.json는 무시하고 개별 명언 파일만 처리
+                if (entry.getFileName().toString().equals("data.json")) {
+                    continue;
+                }
+
                 String json = Files.readString(entry);
                 WiseSaying wiseSaying = parseJsonToWiseSaying(json);
                 if (wiseSaying != null) {
@@ -87,18 +104,22 @@ public class WiseSayingApp {
         }
     }
 
-    /** 특정 WiseSaying 인스턴스를 JSON 형식으로 변환하고, {id}.json 파일로 저장하는 메서드 */
+    /**
+     * 특정 WiseSaying 인스턴스를 JSON 형식으로 변환하고, {id}.json 파일로 저장하는 메서드
+     */
     private void saveWiseSayingToFile(WiseSaying wiseSaying) {
         try {
             String filePath = DB_FOLDER + "/" + wiseSaying.getId() + ".json";
-            String json = createJsonFromWiseSaying(wiseSaying);
+            String json = createJsonFromWiseSaying(wiseSaying, 0);
             Files.writeString(Paths.get(filePath), json);
         } catch (IOException e) {
             System.out.println(wiseSaying.getId() + "번 명언 저장 중 오류 발생: " + e.getMessage());
         }
     }
 
-    /** 지정한 경로 내에서 id에 해당하는 JSON 파일을 삭제하는 메서드 */
+    /**
+     * 지정한 경로 내에서 id에 해당하는 JSON 파일을 삭제하는 메서드
+     */
     private void deleteWiseSayingFile(int id) {
         try {
             String filePath = DB_FOLDER + "/" + id + ".json";
@@ -108,7 +129,9 @@ public class WiseSayingApp {
         }
     }
 
-    /** 사용자에게 입력받은 값으로 WiseSaying 인스턴스를 생성하여 리스트에 추가하고 파일로 저장하는 메서드 */
+    /**
+     * 사용자에게 입력받은 값으로 WiseSaying 인스턴스를 생성하여 리스트에 추가하고 파일로 저장하는 메서드
+     */
     private void registerWiseSaying() {
         System.out.print("명언 : ");
         String content = sc.nextLine();
@@ -121,7 +144,9 @@ public class WiseSayingApp {
         System.out.println(lastId + "번 명언이 등록되었습니다.");
     }
 
-    /** 리스트에 저장된 명언들을 화면에 출력하는 메서드 */
+    /**
+     * 리스트에 저장된 명언들을 화면에 출력하는 메서드
+     */
     private void displayWiseSayings() {
         if (list.isEmpty()) {
             System.out.println("등록된 명언이 없습니다.");
@@ -135,7 +160,9 @@ public class WiseSayingApp {
         }
     }
 
-    /** 지정한 WiseSaying 인스턴스를 리스트와 파일에서 제거하는 메서드 */
+    /**
+     * 지정한 WiseSaying 인스턴스를 리스트와 파일에서 제거하는 메서드
+     */
     private void deleteWiseSaying(String cmd) {
         int id = extractIdFromCommand(cmd);
         if (id == -1) return;
@@ -150,7 +177,9 @@ public class WiseSayingApp {
         }
     }
 
-    /** 지정한 WiseSaying 인스턴스의 content와 author를 수정하고, 변경된 내용을 파일에 저장하는 메서드 */
+    /**
+     * 지정한 WiseSaying 인스턴스의 content와 author를 수정하고, 변경된 내용을 파일에 저장하는 메서드
+     */
     private void updateWiseSaying(String cmd) {
         int id = extractIdFromCommand(cmd);
         if (id == -1) return;
@@ -175,7 +204,9 @@ public class WiseSayingApp {
         }
     }
 
-    /** 지정한 WiseSaying 인스턴스를 찾는 메서드 */
+    /**
+     * 지정한 WiseSaying 인스턴스를 찾는 메서드
+     */
     private WiseSaying findWiseSayingById(int id) {
         for (WiseSaying wiseSaying : list) {
             if (wiseSaying.getId() == id) {
@@ -185,7 +216,9 @@ public class WiseSayingApp {
         return null;
     }
 
-    /** 사용자에게 입력받은 명령 문자열에서 id값을 추출하는 메서드 */
+    /**
+     * 사용자에게 입력받은 명령 문자열에서 id값을 추출하는 메서드
+     */
     private int extractIdFromCommand(String cmd) {
         try {
             return Integer.parseInt(cmd.split("=")[1]);
@@ -195,16 +228,21 @@ public class WiseSayingApp {
         }
     }
 
-    /** 직렬화 메서드(WiseSaying to JSON) */
-    private String createJsonFromWiseSaying(WiseSaying wiseSaying) {
-        return "{\n" +
-                "  \"id\": " + wiseSaying.getId() + ",\n" +
-                "  \"content\": \"" + wiseSaying.getContent().replace("\"", "\\\"") + "\",\n" +
-                "  \"author\": \"" + wiseSaying.getAuthor().replace("\"", "\\\"") + "\"\n" +
-                "}";
+    /**
+     * 특정 WiseSaying 인스턴스를 직렬화하는 메서드(WiseSaying to JSON)
+     */
+    private String createJsonFromWiseSaying(WiseSaying wiseSaying, int indentLevel) {
+        String indent = "  ".repeat(indentLevel);
+        return indent + "{\n" +
+                indent + "  \"id\": " + wiseSaying.getId() + ",\n" +
+                indent + "  \"content\": \"" + wiseSaying.getContent().replace("\"", "\\\"") + "\",\n" +
+                indent + "  \"author\": \"" + wiseSaying.getAuthor().replace("\"", "\\\"") + "\"\n" +
+                indent + "}";
     }
 
-    /** 역직렬화 메서드(JSON to WiseSaying) */
+    /**
+     * 특정 json 파일을 WiseSaying 인스턴스로 역직렬화하는 메서드(JSON to WiseSaying)
+     */
     private WiseSaying parseJsonToWiseSaying(String json) {
         try {
             String[] lines = json.split("\n");
@@ -215,6 +253,34 @@ public class WiseSayingApp {
         } catch (Exception e) {
             System.out.println("JSON 파싱 중 오류 발생: " + e.getMessage());
             return null;
+        }
+    }
+
+    /**
+     * 모든 명언(List<WiseSaying>)을 JSON 배열로 직렬화 하는 메서드
+     */
+    private void buildDataJson() {
+        StringBuilder jsonBuilder = new StringBuilder();
+        jsonBuilder.append("[\n");
+
+        for (int i = 0; i < list.size(); i++) {
+            WiseSaying wiseSaying = list.get(i);
+            jsonBuilder.append(createJsonFromWiseSaying(wiseSaying, 1));
+
+            // 마지막 요소가 아니면 쉼표 추가
+            if (i < list.size() - 1) {
+                jsonBuilder.append(",");
+            }
+
+            jsonBuilder.append("\n");
+        }
+        jsonBuilder.append("]");
+
+        try {
+            Files.writeString(Paths.get(DATA_JSON_FILE), jsonBuilder.toString());
+            System.out.println("data.json 파일의 내용이 갱신되었습니다.");
+        } catch (IOException e) {
+            System.out.println("data.json 저장 중 오류 발생: " + e.getMessage());
         }
     }
 }
