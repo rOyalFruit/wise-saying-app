@@ -2,9 +2,11 @@ package org.example.domain.wiseSaying.util;
 
 import org.example.domain.wiseSaying.entity.WiseSaying;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 명언 객체와 JSON 문자열 간의 변환을 담당하는 유틸리티 클래스
@@ -40,15 +42,20 @@ public class WiseSayingJsonUtil {
     }
 
     /**
-     * WiseSaying 객체 리스트를 JSON 배열 문자열로 변환.
+     * WiseSaying 객체 리스트를 ID를 기준으로 오름차순 정렬한 뒤, JSON 배열 문자열로 변환.
+     *
      * @param wiseSayings 변환할 WiseSaying 객체 리스트
-     * @return JSON 배열 형식의 문자열
+     * @return JSON 배열 형식의 문자열 (ID 기준 오름차순 정렬)
      */
     public static String toJsonArray(List<WiseSaying> wiseSayings) {
+        List<WiseSaying> sortedWiseSayings = wiseSayings.stream()
+                .sorted(Comparator.comparingInt(WiseSaying::getId))
+                .collect(Collectors.toList());
+
         StringBuilder jsonBuilder = new StringBuilder("[\n");
-        for (int i = 0; i < wiseSayings.size(); i++) {
-            jsonBuilder.append(toJson(wiseSayings.get(i)));
-            if (i < wiseSayings.size() - 1) {
+        for (int i = 0; i < sortedWiseSayings.size(); i++) {
+            jsonBuilder.append(toJson(sortedWiseSayings.get(i)));
+            if (i < sortedWiseSayings.size() - 1) {
                 jsonBuilder.append(",");
             }
             jsonBuilder.append("\n");

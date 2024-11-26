@@ -7,6 +7,7 @@ import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * 파일 시스템을 이용한 영구 저장소 역할을 수행.
@@ -96,11 +97,13 @@ public class WiseSayingRepository {
     }
 
     /**
-     * 모든 명언을 조회.
-     * @return 저장된 모든 명언 목록
+     * 모든 명언을 조회하고 ID 기준 내림차순으로 정렬.
+     * @return ID 기준 내림차순으로 정렬된 모든 명언 목록
      */
     public List<WiseSaying> findAll() {
-        return new ArrayList<>(wiseSayings);
+        return wiseSayings.stream()
+                .sorted(Comparator.comparingInt(WiseSaying::getId).reversed())
+                .collect(Collectors.toList());
     }
 
     /**
