@@ -1,8 +1,9 @@
-package org.example;
+package org.example.wiseSaying;
+
+import java.util.stream.IntStream;
 
 public class Main {
     public static void main(String[] args) {
-        WiseSayingApp app = new WiseSayingApp();
-        app.run();
+        new App().run();
     }
 }
