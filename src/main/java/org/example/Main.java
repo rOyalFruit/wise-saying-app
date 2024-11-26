@@ -1,6 +1,6 @@
-package org.example.wiseSaying;
+package org.example;
 
-import java.util.stream.IntStream;
+import org.example.domain.wiseSaying.App;
 
 public class Main {
     public static void main(String[] args) {
