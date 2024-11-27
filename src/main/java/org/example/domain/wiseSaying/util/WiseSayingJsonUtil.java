@@ -20,7 +20,12 @@ public class WiseSayingJsonUtil {
      */
     public static String toJson(WiseSaying wiseSaying) {
         return String.format(
-                "{\"id\":%d,\"content\":\"%s\",\"author\":\"%s\"}",
+                """
+                {
+                  "id": %d,
+                  "content": "%s",
+                  "author": "%s"
+                }""",
                 wiseSaying.getId(),
                 escape(wiseSaying.getContent()),
                 escape(wiseSaying.getAuthor())
@@ -54,7 +59,8 @@ public class WiseSayingJsonUtil {
 
         StringBuilder jsonBuilder = new StringBuilder("[\n");
         for (int i = 0; i < sortedWiseSayings.size(); i++) {
-            jsonBuilder.append(toJson(sortedWiseSayings.get(i)));
+            String json = toJson(sortedWiseSayings.get(i));
+            jsonBuilder.append(json.indent(2).stripTrailing());
             if (i < sortedWiseSayings.size() - 1) {
                 jsonBuilder.append(",");
             }
